@@ -1,0 +1,53 @@
+version: "3.9"
+name: MERN
+services:
+  frontend:
+    image: app/frontend
+    build:
+      context: frontend
+      dockerfile: dockerfile
+    networks:
+      - sub-eth0
+    depends_on:
+      - backend
+
+  backend:
+    image: app/backend
+    build:
+      context: backend
+      dockerfile: dockerfile
+    networks:
+      - sub-eth0
+    depends_on:
+      - db
+
+  revproxy:
+    image: app/revproxy
+    build:
+      context: revproxy
+      dockerfile: dockerfile
+    networks:
+      - sub-eth0
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+      - backend
+      - frontend
+
+  db:
+    image: mongo:6.0
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: mern_db
+    volumes:
+      - mongoDBdata:/data/db
+    networks:
+      - sub-eth0
+
+networks:
+  sub-eth0:
+volumes:
+  mongoDBdata:
